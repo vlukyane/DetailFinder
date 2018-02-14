@@ -1,15 +1,31 @@
 from flask import Flask
 from flask import request
 from flask import jsonify
-import WorkWithDB
+import observer
 import config
 import requests
-import json
+import threading
 
 
 app = Flask(__name__)
-
+file_work = observer.Watcher()
 URL = 'https://api.telegram.org/bot' + config.token
+
+
+class MyThreadForObserver(threading.Thread):
+    def __init__(self, file):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        file_work.run()
+
+
+class MyThreadForBot(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        app.run()
 
 
 def send_message(chat_id, text='bla-bla-bla'):
@@ -31,7 +47,6 @@ def index():
             send_message(chat_id, text='HI! What would you want to find?')
 
         if not flag:
-            file_work = WorkWithDB.ProcessingRequest()
             file_work.make_new_part_num(message)
             response = file_work.data_proc()
             if response[0] == 'S':
@@ -46,8 +61,10 @@ def index():
     return '<h1>Bot greets you</h1>'
 
 
-
 if __name__ == '__main__':
-    #main()
-    app.run()
+    thread1 = MyThreadForObserver(file_work)
+    thread2 = MyThreadForBot()
+    thread1.start()
+    thread2.start()
+
 

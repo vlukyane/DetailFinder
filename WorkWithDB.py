@@ -1,6 +1,7 @@
 import csv
 
-class ProcessingRequest:
+
+class ProcessingRequest():
 
     def __init__(self):
         self.query_part_number = ''
@@ -12,7 +13,9 @@ class ProcessingRequest:
         self.query_part_number = part_number
 
     def dictation_preprocess(self):
-        with open('DB.tsv') as tsvFile:
+        print('kek')
+        self.detail_dict = {}
+        with open('/home/vukyane/Pytin/bot/filefoldr/test.tsv') as tsvFile:
             reader = csv.DictReader(tsvFile, dialect='excel-tab')
             for row in reader:
                 the_next_detail_pt_num = row['part_number']
@@ -26,11 +29,9 @@ class ProcessingRequest:
     def add_to_dict(self, key, det_info):
         self.detail_dict[key].append(det_info)
 
-    #'ZVC403-4'
-
     def data_proc(self):
-        if self.query_part_number in self.detail_dict:
-            self.ans = self.detail_dict[self.query_part_number]
-            return sorted(self.ans, key=lambda i: i[1], reverse=True)
+        self.ans = self.detail_dict.get(self.query_part_number, 'empty')
+        if self.ans != 'empty':
+            return sorted(self.ans, key=lambda i: i[1], reverse=False)
         else:
             return 'Sorry, there is no given part number :('
